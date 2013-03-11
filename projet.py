@@ -36,8 +36,8 @@ def nouvelles_transitions_IU(a1,a2,etats1,etats2,alpha) :
 	for i in range( len(etats1) ) :
 		for j in range( len(etats2) ) :
 			for k in range( len(alpha) ) :
-				l1 = list(a1.delta(alpha[k],[etats1[i]]))
-				l2 = list(a2.delta(alpha[k],[etats2[j]]))
+				l1 = list( a1.delta(alpha[k],[ etats1[i] ]) )
+				l2 = list( a2.delta(alpha[k],[ etats2[j] ]) )
 				for ii in range( len(l1) ) :
 					for jj in range( len(l2) ) :
 						trans = trans + [( (etats1[i],etats2[j]), alpha[k] , (l1[ii],l2[jj]) )]
@@ -51,7 +51,7 @@ def produit_cartesien( l1, l2 ) :
 	l = list()
 	for i in range(len(l1)) :
 		for j in range(len(l2)) :
-			l.append(list((l1[i], l2[j])))
+			l.append(tuple((l1[i], l2[j])))
 
 	return l
 
@@ -90,7 +90,7 @@ def union( Aut1, Aut2 ) :
 	u = automaton( 
 		alphabet = alpha,
 		states = et,
-		initials = [ini],
+		initials = ini,
 		finals = f2,
 		transitions = tr)
 
@@ -123,12 +123,17 @@ def intersection(aut1,aut2) :
 
 	fin1 = list( a1.get_final_states() )
 	fin2 = list( a2.get_final_states() )
-	#fin = produit_cartesien()
+	fin = produit_cartesien(fin1,fin2)
 
 	trans = nouvelles_transitions_IU(a1, a2,etats1,etats2,alpha)
 
-	#return automaton(alphabet = alpha, states = etats, initials = ini, finals = fin, transitions = trans)
-	return None
+	a = automaton(alphabet = alpha,
+			 states = etats,
+			 initials = ini,
+			 finals = fin,
+			 transitions = trans )
+	a.renumber_the_states()
+	return a
  
 def miroir( Aut ) :
 
