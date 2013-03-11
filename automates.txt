@@ -1,0 +1,4 @@
+from projet import *
+>>> auto1 = automaton(alphabet = ['a', 'b'], initials = [0,1], finals = [2], transitions = [(0,'a',1),(1,'b',2)])
+>>> auto2= automaton(alphabet = ['a', 'b'], initials = [0], finals = [1,2], transitions = [(0,'a',1),(0,'b',1),(1,'a',2),(1,'b',0)])
+>>> autuni = union(auto1,auto2)
