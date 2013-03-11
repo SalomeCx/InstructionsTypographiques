@@ -30,6 +30,19 @@ def completer( Aut ):
 
 	return a
 
+def nouvelles_transitions_IU(etats1,etats2,alpha) :
+	trans = []
+
+	for i in range( len(etats1) ) :
+		for j in range( len(etats2) ) :
+			for k in range( len(alpha) ) :
+				l1 = a1.delta(alpha[k],etats1[i])
+				l2 = a2.delta(alpha[k],etats2[j])
+				for ii in range( len(l1) ) :
+					for jj in range( len(l2) ) :
+						trans = trans + [( (etats1[i],etats2[j]), alpha[k] , (l1[ii],l2[jj]) )]
+	return trans
+
 
 """
 Retourne un automate construit 
@@ -93,6 +106,39 @@ def union( Aut1, Aut2 ) :
 
 	#u.renumber_the_states()
 	return u
+
+"""
+Retourne un automate construit 
+sur l'intersection des deux automates passés en paramètres.
+On considère l'intersection uniquement sur deux automates comprenant
+le même alphabet.
+"""
+def intersection(aut1,aut2) :
+	# L'intersection se fait sur deux automates complets.
+	a1 = completer( aut1 )
+	a2 = completer( aut2 )
+
+	alpha = list(a1.get_alphabet())
+
+	if alpha != list(a2.get_alphabet()) :
+		return None
+
+	etats1 = list( a1.get_states() )
+	etats2 = list( a2.get_states() )
+	etats = produit_cartesien(etats1,etats2)
+
+	ini1 = list( a1.get_initial_states() )
+	ini2 = list( a2.get_initial_states() )
+	ini = produit_cartesien(ini1,ini2)
+
+	fin1 = list( a1.get_final_states() )
+	fin2 = list( a2.get_final_states() )
+	fin = produit_cartesien()
+
+	trans = nouvelles_transitions_IU(etats1,etats2,alpha)
+
+	return automaton(alphabet = alpha, states = etats, initials = ini, finals = fin, transitions = trans)
+ 
 """
 def miroir( Aut ) :
 	a = automaton(
