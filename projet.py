@@ -30,7 +30,7 @@ def completer( Aut ):
 
 	return a
 
-def nouvelles_transitions_IU(etats1,etats2,alpha) :
+def nouvelles_transitions_IU(a1,a2,etats1,etats2,alpha) :
 	trans = []
 
 	for i in range( len(etats1) ) :
@@ -45,66 +45,56 @@ def nouvelles_transitions_IU(etats1,etats2,alpha) :
 
 
 """
+Renvoie le produit cartésien de deux listes.
+"""
+def produit_cartesien( l1, l2 ) :
+	l = list()
+	for i in range(len(l1)) :
+		for j in range(len(l2)) :
+			l.append(list((l1[i], l2[j])))
+
+	return l
+
+
+"""
 Retourne un automate construit 
 sur l'union des deux automates passés en paramètres.
 On considère l'union uniquement sur deux automates comprenant
 le même alphabet.
 """
 def union( Aut1, Aut2 ) :
-	# L'union se fait sur deux automates complets.
-	a1 = completer( Aut1 )
-	a2 = completer( Aut2 )
+	alpha = list(Aut1.get_alphabet())
 
-	# On récupère les états finaux pour connaître les nouveaux
-	# états finaux.
-	f1 = list(a1.get_final_states())
-	f2 = list(a2.get_final_states())
+	if alpha != list( Aut2.get_alphabet() ) :
+		return None
 
-	# L'état initial.
-	ini = tuple((tuple(a1.get_initial_states()), 
-		tuple(a2.get_initial_states())))
+	# Tous les états.
+	et1 = list(Aut1.get_states())
+	et2 = list(Aut2.get_states())
+	et = produit_cartesien(et1, et2)
 
-	alpha = list(a1.get_alphabet())
+	# Les états finaux.
+	f1 = produit_cartesien(list(Aut1.get_final_states()), et2)
+	f2 = produit_cartesien(list(Aut2.get_final_states()), et1)
+
+	for i in range(len(f1)) :
+		if f1[i] not in f2 :
+			f2.append(f1[i])
+
+	# Les états initiaux.
+	ini = produit_cartesien(list(Aut1.get_initial_states()), 
+		list(Aut2.get_initial_states()))
+
+	tr = nouvelles_transitions_IU(Aut1, Aut2, et1, et2, alpha)
 
 	u = automaton( 
 		alphabet = alpha,
-		initials = [ini])
+		states = et,
+		initials = [ini],
+		finals = f2,
+		transitions = tr)
 
-	# On construit la liste des nouveaux états au fur et à mesure.
-	etats = list( (ini,) )
-
-	for i in range(len(etats)) :
-		for j in range(len(alpha)) :
-			etmp = tuple((tuple((a1.delta(alpha[j], etats[i][0]))),
-				tuple((a2.delta(alpha[j], etats[i][1])))))
-			if etmp not in etats :
-				etats.append(etmp)
-				etats
-				isf = False
-				# Pas terrible. A changer. Probablement.
-				# Si un état du premier automate est final, l'état
-				# obtenu est final.
-				for k in range(len(etmp[0])) :
-					if etmp[0][k] in f1 :
-						u.add_final_state(etmp)
-						isf = True
-						break
-				# Sinon, on cherche dans les états finaux du 
-				# second automate.
-				if not isf :
-					for k in range(len(etmp[1])) :
-						if etmp[1][k] in f2 :
-							u.add_final_state(etmp)
-							isf = True
-							break
-
-				# Sinon, c'est que l'état obtenu n'est pas final.
-				if not isf :
-					u.add_state(etmp)
-
-			u.add_transition( (etats[i], alpha[j], etmp) )
-
-	#u.renumber_the_states()
+	u.renumber_the_states()
 	return u
 
 """
@@ -120,7 +110,7 @@ def intersection(aut1,aut2) :
 
 	alpha = list(a1.get_alphabet())
 
-	if alpha != list(a2.get_alphabet()) :
+	if alpha != list( a2.get_alphabet() ) :
 		return None
 
 	etats1 = list( a1.get_states() )
@@ -133,11 +123,12 @@ def intersection(aut1,aut2) :
 
 	fin1 = list( a1.get_final_states() )
 	fin2 = list( a2.get_final_states() )
-	fin = produit_cartesien()
+	#fin = produit_cartesien()
 
-	trans = nouvelles_transitions_IU(etats1,etats2,alpha)
+	trans = nouvelles_transitions_IU(a1, a2,etats1,etats2,alpha)
 
-	return automaton(alphabet = alpha, states = etats, initials = ini, finals = fin, transitions = trans)
+	#return automaton(alphabet = alpha, states = etats, initials = ini, finals = fin, transitions = trans)
+	return None
  
 """
 def miroir( Aut ) :
