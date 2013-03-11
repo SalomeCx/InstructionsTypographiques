@@ -130,12 +130,17 @@ def intersection(aut1,aut2) :
 	#return automaton(alphabet = alpha, states = etats, initials = ini, finals = fin, transitions = trans)
 	return None
  
-"""
 def miroir( Aut ) :
+
+	trans = list( Aut.get_transitions() )
+	newTrans = []
+	for i in range( len(trans) ) :
+		newTrans = newTrans + [(trans[i][2], trans[i][1], trans[i][0] )]
+	
 	a = automaton(
 		alphabet = list(Aut.get_alphabet()), 
 		states = list(Aut.get_states()), 
 		initials = list(Aut.get_final_states()),
-		finals = list(Aut.get_initial_states())
-	return a		
-"""
+		finals = list(Aut.get_initial_states()),
+		transitions = newTrans )
+	return a
