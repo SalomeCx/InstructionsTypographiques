@@ -36,8 +36,8 @@ def nouvelles_transitions_IU(a1,a2,etats1,etats2,alpha) :
 	for i in range( len(etats1) ) :
 		for j in range( len(etats2) ) :
 			for k in range( len(alpha) ) :
-				l1 = a1.delta(alpha[k],etats1[i])
-				l2 = a2.delta(alpha[k],etats2[j])
+				l1 = list(a1.delta(alpha[k],[etats1[i]]))
+				l2 = list(a2.delta(alpha[k],[etats2[j]]))
 				for ii in range( len(l1) ) :
 					for jj in range( len(l2) ) :
 						trans = trans + [( (etats1[i],etats2[j]), alpha[k] , (l1[ii],l2[jj]) )]
