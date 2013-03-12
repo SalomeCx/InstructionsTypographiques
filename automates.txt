@@ -2,3 +2,6 @@ from projet import *
 >>> auto1 = automaton(alphabet = ['a', 'b'], initials = [0,1], finals = [2], transitions = [(0,'a',1),(1,'b',2)])
 >>> auto2= automaton(alphabet = ['a', 'b'], initials = [0], finals = [1,2], transitions = [(0,'a',1),(0,'b',1),(1,'a',2),(1,'b',0)])
 >>> autuni = union(auto1,auto2)
+
+>>> ex1 = automaton(alphabet = ['a','b','c'],states=[1],initials=[0],finals=[2],transitions=[(0,'a',0),(0,'c',0),(0,'b',1),(1,'c',0),(1,'b',1),(1,'a',2),(2,'a',2),(2,'b',2),(2,'c',2)])
+>>> ex2 = automaton(alphabet=['a','b','c'],initials=[0],finals=[1],transitions=[(0,'a',0),(0,'b',0),(0,'c',1),(1,'a',1),(1,'b',1),(1,'c',1)])

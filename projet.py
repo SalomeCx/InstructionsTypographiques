@@ -1,5 +1,39 @@
 from automaton import *
 
+
+"""
+Supprime un état donné d'un automate. Si l'état avait des transitions,
+les efface également.
+"""
+def delete_state( Aut, state ) :
+	alpha = list(Aut.get_alphabet())
+	s = list(Aut.get_states())
+	if state not in s :
+		return None
+	else :
+		s.remove(state)
+	
+	init = list(Aut.get_initial_states())
+	if state in init :
+		init.remove(state)
+
+	fin = list(Aut.get_final_states())
+	if state in fin :
+		fin.remove(state)
+
+	trans = list(Aut.get_transitions())
+	for i in range(len(trans)) :
+		if trans[i][0] == state or trans[i][2] == state :
+			trans.pop([i])
+
+	return automaton(alphabet = alpha,
+		states = s,
+		initials = init,
+		finals = fin,
+		transitions = trans)
+
+
+
 """
 Complète l'automate donné en lui ajoutant un état puit.
 On ne modifie pas l'automate pris en paramètre, on utilise un clone.  
@@ -26,7 +60,7 @@ def completer( Aut ):
 	# Si complet = False, c'est que l'automate est déjà complet, 
 	# on enlève l'état puit.
 	if not complet :
-		a.delete_state(puit)
+		a = delete_state(a, puit)
 
 	return a
 
@@ -75,7 +109,7 @@ def union( Aut1, Aut2 ) :
 
 	# Les états finaux.
 	f1 = produit_cartesien(list(Aut1.get_final_states()), et2)
-	f2 = produit_cartesien(list(Aut2.get_final_states()), et1)
+	f2 = produit_cartesien(et1, list(Aut2.get_final_states()))
 
 	for i in range(len(f1)) :
 		if f1[i] not in f2 :
