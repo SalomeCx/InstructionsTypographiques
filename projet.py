@@ -54,7 +54,7 @@ def completer( Aut ):
 		for j in range(len(s)) :
 			if len(a.delta(alpha[i], [s[j]])) == 0 :
 				complet = True
-				a.add_transition( (j, alpha[i], puit) )
+				a.add_transition( (s[j], alpha[i], puit) )
 
 	# Si complet = False, c'est que l'automate est déjà complet, 
 	# on enlève l'état puit.
