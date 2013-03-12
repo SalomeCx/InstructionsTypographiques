@@ -99,6 +99,9 @@ On considère l'union uniquement sur deux automates comprenant
 le même alphabet.
 """
 def union( Aut1, Aut2 ) :
+	Aut1 = completer(Aut1)
+	Aut2 = completer(Aut2)
+	
 	alpha = list(Aut1.get_alphabet())
 
 	if alpha != list( Aut2.get_alphabet() ) :
@@ -129,7 +132,7 @@ def union( Aut1, Aut2 ) :
 		initials = ini,
 		finals = f2,
 		transitions = tr)
-
+	
 	u.renumber_the_states()
 	return u
 
@@ -141,6 +144,9 @@ le même alphabet.
 """
 def intersection(aut1,aut2) :
 
+	aut1 = completer(aut1)
+	aut2 = completer(aut2)
+	
 	alpha = list(aut1.get_alphabet())
 
 	if alpha != list( aut2.get_alphabet() ) :
@@ -182,3 +188,39 @@ def miroir( Aut ) :
 		finals = Aut.get_initial_states(),
 		transitions = newTrans )
 	return a
+
+def determiniser( aut ) :
+
+        ini = aut.get_initial_states()
+        states = [ini]
+        trans = []
+        
+        alpha = aut.get_alphabet()
+
+        l = [ini]
+        while( len(l) != 0 ) :
+                for i in alpha :
+                        tmp = aut.delta(i,l[0])
+                        if len(tmp) != 0 :
+                                trans += [ ( l[0] , i , tmp ) ]
+                                if not tmp in states :
+                                        states += [tmp]
+                                        l += [tmp]
+                l.pop(0)
+
+        oldFinals = aut.get_final_states()
+        fin = []
+        for i in states :
+                for j in i :
+                        if j in oldFinals :
+                                fin += [i]
+                                break
+
+        a = automaton(
+                alphabet = alpha,
+                states = states,
+                initials = [ini],
+                finals = fin,
+                transitions = trans)
+        a.renumber_the_states()
+        return a
