@@ -224,3 +224,21 @@ def determiniser( aut ) :
                 transitions = trans)
         a.renumber_the_states()
         return a
+
+def complement( aut ) :
+
+        a = completer(determiniser( aut ) )
+
+        oldFinals = a.get_final_states()
+        fin = []
+
+        for i in a.get_states() :
+                if not i in oldFinals :
+                        fin += [i]
+
+        return automaton(
+                alphabet = a.get_alphabet(),
+                states = a.get_states(),
+                initials = a.get_initial_states(),
+                finals = fin,
+                transitions = a.get_transitions())
