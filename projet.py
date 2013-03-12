@@ -45,9 +45,8 @@ def completer( Aut ):
 
 	# On parcourt tous les états pour donner un nom correct à l'état puit.
 	puit = a.get_maximal_id() + 1
-	#while puit in s :
-	#	puit = puit + 1
 	a.add_state(puit)
+	
 	# On modifie ce booléen si on fait au moins une modification.
 	complet = False 
 
@@ -138,28 +137,25 @@ On considère l'intersection uniquement sur deux automates comprenant
 le même alphabet.
 """
 def intersection(aut1,aut2) :
-	# L'intersection se fait sur deux automates complets.
-	a1 = completer( aut1 )
-	a2 = completer( aut2 )
 
-	alpha = list(a1.get_alphabet())
+	alpha = list(aut1.get_alphabet())
 
-	if alpha != list( a2.get_alphabet() ) :
+	if alpha != list( aut2.get_alphabet() ) :
 		return None
 
-	etats1 = list( a1.get_states() )
-	etats2 = list( a2.get_states() )
+	etats1 = list( aut1.get_states() )
+	etats2 = list( aut2.get_states() )
 	etats = produit_cartesien(etats1,etats2)
 
-	ini1 = list( a1.get_initial_states() )
-	ini2 = list( a2.get_initial_states() )
+	ini1 = list( aut1.get_initial_states() )
+	ini2 = list( aut2.get_initial_states() )
 	ini = produit_cartesien(ini1,ini2)
 
-	fin1 = list( a1.get_final_states() )
-	fin2 = list( a2.get_final_states() )
+	fin1 = list( aut1.get_final_states() )
+	fin2 = list( aut2.get_final_states() )
 	fin = produit_cartesien(fin1,fin2)
 
-	trans = nouvelles_transitions_IU(a1, a2,etats1,etats2,alpha)
+	trans = nouvelles_transitions_IU(aut1, aut2,etats1,etats2,alpha)
 
 	a = automaton(alphabet = alpha,
 			 states = etats,
