@@ -177,9 +177,9 @@ def miroir( Aut ) :
 		newTrans = newTrans + [(trans[i][2], trans[i][1], trans[i][0] )]
 	
 	a = automaton(
-		alphabet = list(Aut.get_alphabet()), 
-		states = list(Aut.get_states()), 
-		initials = list(Aut.get_final_states()),
-		finals = list(Aut.get_initial_states()),
+		alphabet = Aut.get_alphabet(), 
+		states = Aut.get_states(), 
+		initials = Aut.get_final_states(),
+		finals = Aut.get_initial_states(),
 		transitions = newTrans )
 	return a
