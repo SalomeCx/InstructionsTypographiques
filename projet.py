@@ -60,6 +60,9 @@ def completer( Aut ):
 	# on enlève l'état puit.
 	if not complet :
 		a = delete_state(a, puit)
+	else :
+		for i in range(len(alpha)) :
+			a.add_transition( (puit, alpha[i], puit) )
 
 	return a
 
