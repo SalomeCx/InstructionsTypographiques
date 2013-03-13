@@ -191,54 +191,141 @@ def miroir( Aut ) :
 
 def determiniser( aut ) :
 
-        ini = aut.get_initial_states()
-        states = [ini]
-        trans = []
+    ini = aut.get_initial_states()
+    states = [ini]
+    trans = []
         
-        alpha = aut.get_alphabet()
+    alpha = aut.get_alphabet()
 
-        l = [ini]
-        while( len(l) != 0 ) :
-                for i in alpha :
-                        tmp = aut.delta(i,l[0])
-                        if len(tmp) != 0 :
-                                trans += [ ( l[0] , i , tmp ) ]
-                                if not tmp in states :
-                                        states += [tmp]
-                                        l += [tmp]
-                l.pop(0)
+    l = [ini]
+    while( len(l) != 0 ) :
+        for i in alpha :
+            tmp = aut.delta(i,l[0])
+            if len(tmp) != 0 :
+                trans += [ ( l[0] , i , tmp ) ]
+                if not tmp in states :
+                    states += [tmp]
+                    l += [tmp]
+        l.pop(0)
 
-        oldFinals = aut.get_final_states()
-        fin = []
-        for i in states :
-                for j in i :
-                        if j in oldFinals :
-                                fin += [i]
-                                break
+    oldFinals = aut.get_final_states()
+    fin = []
+    for i in states :
+        for j in i :
+            if j in oldFinals :
+                fin += [i]
+                break
 
-        a = automaton(
-                alphabet = alpha,
-                states = states,
-                initials = [ini],
-                finals = fin,
-                transitions = trans)
-        a.renumber_the_states()
-        return a
+    a = automaton(
+    	alphabet = alpha,
+        states = states,
+        initials = [ini],
+        finals = fin,
+        transitions = trans)
+    a.renumber_the_states()
+    return a
 
 def complement( aut ) :
 
-        a = completer(determiniser( aut ) )
+	a = completer(determiniser( aut ) )
 
-        oldFinals = a.get_final_states()
-        fin = []
+	oldFinals = a.get_final_states()
+	fin = []
 
-        for i in a.get_states() :
-                if not i in oldFinals :
-                        fin += [i]
+	for i in a.get_states() :
+		if not i in oldFinals :
+			fin += [i]
 
-        return automaton(
-                alphabet = a.get_alphabet(),
-                states = a.get_states(),
-                initials = a.get_initial_states(),
-                finals = fin,
-                transitions = a.get_transitions())
+	return automaton(
+		alphabet = a.get_alphabet(),
+		states = a.get_states(),
+		initials = a.get_initial_states(),
+		finals = fin,
+		transitions = a.get_transitions())
+
+
+"""
+Fonction intermédiaire qui applique une fois l'algorithme de Moore.
+Elle prend en paramètres l'automate concerné, la liste de ses
+états, son alphabet et une liste de tuples repésentant les valeurs
+obtenues en appliquant l'algorithme au tour précédent:
+lim = [(groupe de etats[0], groupe par alpha[0], groupe par alpha[1]...),
+		(groupe de etats[1], etc...)]
+"""
+def moore( Aut, etats, alpha, lim ) :
+	# On crée une nouvelle liste que l'on retournera.
+	lmoore = list()
+
+	# On renumérote les états.
+	gpe = -1;
+	for i in range(len(lim)) :
+		if lim[i] not in lim[:i] :
+			gpe += 1
+			lmoore.append(tuple((gpe,)))
+		else :
+			lmoore.append(tuple((lim.index(lim[i]),)))
+
+	# On recrée les nouveaux groupes d'états.
+	for i in range(len(lim)) :
+		for j in range(len(alpha)) :
+			d = list(Aut.delta(alpha[j], [ etats[i] ]))
+			lmoore[i] = lmoore[i] + tuple((lmoore[etats.index(d[0])][0],))
+
+	return lmoore
+
+
+def minimiser( Aut ) :
+	etats = list(Aut.get_states())
+	alpha = list(Aut.get_alphabet())
+
+	# Initialisation. On sépare les états finaux du reste.
+	lm1 = list()
+	for i in range(len(etats)) :
+		if Aut.state_is_final(etats[i]) :
+			lm1.append(tuple((1,)))
+		else :
+			lm1.append(tuple((0,)))
+		for j in range(len(alpha)) :
+			d = list(Aut.delta(alpha[j], [ etats[i] ]))
+			if Aut.state_is_final(d[0]) :
+				lm1[i] = lm1[i] + tuple((1,))
+			else :
+				lm1[i] = lm1[i] + tuple((0,))
+	
+	# On applique l'algorithme de Moore tant que la liste 
+	# n'est pas stable.
+	lm2 = moore(Aut, etats, alpha, lm1)
+	while lm1 != lm2 :
+		lm1 = lm2
+		lm2 = moore(Aut, etats, alpha, lm1)
+
+	# On récupère l'état initial.
+	init = lm2[etats.index(list(Aut.get_initial_states())[0])][0]
+
+	# On recherche les nouveaux états finaux.
+	lm1 = list()
+	ets = list()
+	for i in range(len(etats)) :
+		if Aut.state_is_final(etats[i]) :
+			lm1.append(lm2[i][0])
+		ets.append(lm2[i][0])
+	# On enlève les doublons
+	# lm1 la liste des états finaux.
+	# lm2 la totalité des états et des transitions.
+	# ets la liste de tous les états.
+	lm1 = list(set(lm1))
+	lm2 = list(set(lm2))
+	ets = list(set(ets))
+
+	amin = automaton(
+		alphabet = alpha,
+		states = ets,
+        initials = [init],
+        finals = lm1)
+
+	# On récupère les nouvelles transitions.
+	for i in range(len(lm2)) :
+		for j in range(len(alpha)) :
+			amin.add_transition( (lm2[i][0], alpha[j], lm2[i][j + 1]) )
+
+	return amin
