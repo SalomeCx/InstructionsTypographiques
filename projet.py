@@ -329,3 +329,191 @@ def minimiser( Aut ) :
 			amin.add_transition( (lm2[i][0], alpha[j], lm2[i][j + 1]) )
 
 	return amin
+
+# expression vers automate
+
+def operation(expr) :
+	if len(expr) != 0 :
+		if expr[0] == '*' :
+			return etoile(expr[1])
+		elif expr[0] == '+' :
+			return unionEVA(expr[1],expr[2])
+		elif expr[0] == '.' :
+			return concatenation(expr[1],expr[2])
+		elif len(expr) == 1 :
+			return automaton(alphabet = expr,
+					states = [1,2],
+					initials = [1],
+					finals = [2],
+                                         transitions = [ (1 , expr , 2) ] )
+		
+	return None
+
+def generer_epsilon(alpha) :
+	i = 0
+	while( True ) :
+		 if not str(i) in alpha :
+			 return str(i)
+		 i += 1
+
+def expression_vers_automate( expr ) :
+	return operation(expr)
+
+
+def etoile(expr) :
+	aut = operation(expr)
+	
+	s1 = aut.get_maximal_id() + 1
+	s2 = s1 + 1
+	s3 = s2 + 1
+	s4 = s3 + 1
+
+	alpha = aut.get_alphabet()
+	
+	if(aut.has_epsilon_characters()) :
+		epsilon = list(aut.get_epsilons())[0]
+	else :
+		epsilon = generer_epsilon(alpha)
+
+	transitions = list( aut.get_transitions() ) 
+	transitions += [ (s1 , epsilon , s2) ,
+			 (s1 , epsilon , s4) ,
+			 (s3 , epsilon , s2) ,
+			 (s3 , epsilon , s4) ]
+	for i in aut.get_initial_states() :
+		transitions += [ (s2 , epsilon , i ) ]
+	for i in aut.get_final_states() :
+		transitions += [ ( i , epsilon , s3 ) ]
+
+	return automaton(alphabet = alpha,
+			 epsilons = [epsilon] ,
+			 states = list(aut.get_states()) + [s1 , s2 , s3, s4] ,
+			 initials = [s1] ,
+			 finals = [s4],
+                         transitions = transitions)
+
+def unionEVA(expr1,expr2) :
+
+	#on renomme les états au cas où il y aurait des redondances
+	aut1 = operation(expr1)
+	aut2 = operation(expr2)
+
+	aut1.renumber_the_states()
+	aut2.renumber_the_states()
+	x = aut1.get_maximal_id() + 1
+
+	def rajouter(y) :
+		return y + x
+
+	aut2.map(rajouter)
+
+	#on génère le nouvel alphabet et on fusionne tous les epsilons en un même symbole,
+	#permet d'éviter les problèmes liés au fait qu'un epsilon de aut1
+	#peut être dans l'alphabet de aut2, et inversement.
+	old_epsilon1 = aut1.get_epsilons()
+	old_epsilon2 = aut2.get_epsilons()
+	
+	alpha1 = list( aut1.get_alphabet()  - old_epsilon1 )
+	alpha2 = list( aut2.get_alphabet()  - old_epsilon2 )
+	
+	alpha = list( aut1.get_alphabet() - old_epsilon1 )
+	for i in alpha2 :
+		if not i in alpha :
+			alpha += [i]
+
+	epsilon = generer_epsilon(alpha)
+
+	transitions = []
+
+	for i in aut1.get_transitions() :
+		if i[1] in old_epsilon1 :
+			transitions += [ ( i[0] , epsilon , i[2] ) ]
+		else :
+			transitions += [i]
+	for i in aut2.get_transitions() :
+		if i[1] in old_epsilon2 :
+			transitions += [ ( i[0] , epsilon , i[2] ) ]
+		else :
+			transitions += [i]
+			
+	#creation de l'automate union
+	s1 = aut2.get_maximal_id() + 1
+	s2 = s1 + 1
+
+	for i in aut1.get_initial_states() :
+		transitions += [ (s1 , epsilon , i ) ]
+	for i in aut1.get_final_states() :
+		transitions += [ (i , epsilon , s2) ]
+	for i in aut2.get_initial_states() :
+		transitions += [ (s1 , epsilon , i ) ]
+	for i in aut2.get_final_states() :
+		transitions += [ (i , epsilon , s2) ]
+
+	return automaton( alphabet = alpha ,
+			  epsilons = [ epsilon ] ,
+			  finals = [s2] ,
+			  initials = [s1] ,
+			  transitions = transitions )
+
+def concatenation(expr1,expr2) :
+
+	#on renomme les états au cas où il y aurait des redondances
+	aut1 = operation(expr1)
+	aut2 = operation(expr2)
+
+	aut1.renumber_the_states()
+	aut2.renumber_the_states()
+	x = aut1.get_maximal_id() + 1
+
+	def rajouter(y) :
+		return y + x
+
+	aut2.map(rajouter)
+
+	#on génère le nouvel alphabet et on fusionne tous les epsilons en un même symbole,
+	#permet d'éviter les problèmes liés au fait qu'un epsilon de aut1
+	#peut être dans l'alphabet de aut2, et inversement.
+	old_epsilon1 = aut1.get_epsilons()
+	old_epsilon2 = aut2.get_epsilons()
+	
+	alpha1 = list( aut1.get_alphabet()  - old_epsilon1 )
+	alpha2 = list( aut2.get_alphabet()  - old_epsilon2 )
+	
+	alpha = list( aut1.get_alphabet() - old_epsilon1 )
+	for i in alpha2 :
+		if not i in alpha :
+			alpha += [i]
+
+	epsilon = generer_epsilon(alpha)
+
+	transitions = []
+
+	for i in aut1.get_transitions() :
+		if i[1] in old_epsilon1 :
+			transitions += [ ( i[0] , epsilon , i[2] ) ]
+		else :
+			transitions += [i]
+	for i in aut2.get_transitions() :
+		if i[1] in old_epsilon2 :
+			transitions += [ ( i[0] , epsilon , i[2] ) ]
+		else :
+			transitions += [i]
+			
+	#creation de l'automate concaténation
+	s1 = aut2.get_maximal_id() + 1
+	s2 = s1 + 1
+
+	for i in aut1.get_initial_states() :
+		transitions += [ (s1 , epsilon , i ) ]
+	for i in aut1.get_final_states() :
+		for j in aut2.get_initial_states() :
+			transitions += [ (i , epsilon , j) ]
+	for i in aut2.get_final_states() :
+		transitions += [ (i , epsilon , s2) ]
+
+	return automaton( alphabet = alpha ,
+			  epsilons = [ epsilon ] ,
+			  finals = [s2] ,
+			  initials = [s1] ,
+			  transitions = transitions )
+
