@@ -1,15 +1,20 @@
-from automaton import *
+#-*- coding: cp1252 -*-
 
+from automaton import *
+from expressionRationnelle_yacc import *
+
+yacc.yacc()
 
 """
 Supprime un état donné d'un automate. Si l'état avait des transitions,
 les efface également.
 """
 def delete_state( Aut, state ) :
+
 	alpha = list(Aut.get_alphabet())
 	s = list(Aut.get_states())
 	if state not in s :
-		return None
+		return Aut
 	else :
 		s.remove(state)
 	
@@ -22,9 +27,12 @@ def delete_state( Aut, state ) :
 		fin.remove(state)
 
 	trans = list(Aut.get_transitions())
-	for i in range(len(trans)) :
+	i = 0
+	while i != len(trans) :
 		if trans[i][0] == state or trans[i][2] == state :
-			trans.pop([i])
+			trans.pop(i)
+		else :
+			i+=1
 
 	return automaton(alphabet = alpha,
 		states = s,
@@ -195,7 +203,7 @@ def determiniser( aut ) :
     states = [ini]
     trans = []
         
-    alpha = aut.get_alphabet()
+    alpha = aut.get_alphabet() - aut.get_epsilons()
 
     l = [ini]
     while( len(l) != 0 ) :
@@ -530,7 +538,7 @@ def expr_concat ( expr ) :
 
 	return expr2
 
-
+"""
 def expr_rationnelle_bis ( expr ) :
 	l = list()
 
@@ -582,4 +590,7 @@ def expr_rationnelle_bis ( expr ) :
 			elif l[len(l)-1]
 
 	return l
+"""
 
+def expression_rationnelle_vers_liste(s) :
+	return yacc.parse(expr_concat(s))
