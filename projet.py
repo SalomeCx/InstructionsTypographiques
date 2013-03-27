@@ -6,8 +6,8 @@ from expressionRationnelle_yacc import *
 yacc.yacc()
 
 """
-Supprime un Ã©tat donnÃ© d'un automate. Si l'Ã©tat avait des transitions,
-les efface Ã©galement.
+Supprime un état donné d'un automate. Si l'état avait des transitions,
+les efface également.
 """
 def delete_state( Aut, state ) :
 
@@ -43,19 +43,19 @@ def delete_state( Aut, state ) :
 
 
 """
-ComplÃ¨te l'automate donnÃ© en lui ajoutant un Ã©tat puit.
-On ne modifie pas l'automate pris en paramÃ¨tre, on utilise un clone.  
+Complète l'automate donné en lui ajoutant un état puit.
+On ne modifie pas l'automate pris en paramètre, on utilise un clone.  
 """
 def completer( Aut ):
 	a = Aut.get_renumbered_automaton()
 	s = list(a.get_states())
 	alpha = list(a.get_alphabet())
 
-	# On parcourt tous les Ã©tats pour donner un nom correct Ã  l'Ã©tat puit.
+	# On parcourt tous les états pour donner un nom correct à l'état puit.
 	puit = a.get_maximal_id() + 1
 	a.add_state(puit)
 	
-	# On modifie ce boolÃ©en si on fait au moins une modification.
+	# On modifie ce booléen si on fait au moins une modification.
 	complet = False 
 
 	for i in range(len(alpha)) :
@@ -64,8 +64,8 @@ def completer( Aut ):
 				complet = True
 				a.add_transition( (s[j], alpha[i], puit) )
 
-	# Si complet = False, c'est que l'automate est dÃ©jÃ  complet, 
-	# on enlÃ¨ve l'Ã©tat puit.
+	# Si complet = False, c'est que l'automate est déjà  complet, 
+	# on enlève l'état puit.
 	if not complet :
 		a = delete_state(a, puit)
 	else :
@@ -89,7 +89,7 @@ def nouvelles_transitions_IU(a1,a2,etats1,etats2,alpha) :
 
 
 """
-Renvoie le produit cartÃ©sien de deux listes.
+Renvoie le produit cartésien de deux listes.
 """
 def produit_cartesien( l1, l2 ) :
 	l = list()
@@ -102,9 +102,9 @@ def produit_cartesien( l1, l2 ) :
 
 """
 Retourne un automate construit 
-sur l'union des deux automates passÃ©s en paramÃ¨tres.
-On considÃ¨re l'union uniquement sur deux automates comprenant
-le mÃªme alphabet.
+sur l'union des deux automates passés en paramètres.
+On considère l'union uniquement sur deux automates comprenant
+le même alphabet.
 """
 def union( Aut1, Aut2 ) :
 	Aut1 = completer(Aut1)
@@ -115,12 +115,12 @@ def union( Aut1, Aut2 ) :
 	if alpha != list( Aut2.get_alphabet() ) :
 		return None
 
-	# Tous les Ã©tats.
+	# Tous les états.
 	et1 = list(Aut1.get_states())
 	et2 = list(Aut2.get_states())
 	et = produit_cartesien(et1, et2)
 
-	# Les Ã©tats finaux.
+	# Les états finaux.
 	f1 = produit_cartesien(list(Aut1.get_final_states()), et2)
 	f2 = produit_cartesien(et1, list(Aut2.get_final_states()))
 
@@ -128,7 +128,7 @@ def union( Aut1, Aut2 ) :
 		if f1[i] not in f2 :
 			f2.append(f1[i])
 
-	# Les Ã©tats initiaux.
+	# Les états initiaux.
 	ini = produit_cartesien(list(Aut1.get_initial_states()), 
 		list(Aut2.get_initial_states()))
 
@@ -144,11 +144,12 @@ def union( Aut1, Aut2 ) :
 	u.renumber_the_states()
 	return u
 
+
 """
 Retourne un automate construit 
-sur l'intersection des deux automates passÃ©s en paramÃ¨tres.
-On considÃ¨re l'intersection uniquement sur deux automates comprenant
-le mÃªme alphabet.
+sur l'intersection des deux automates passés en paramètres.
+On considère l'intersection uniquement sur deux automates comprenant
+le même alphabet.
 """
 def intersection(aut1,aut2) :
 
@@ -253,18 +254,18 @@ def complement( aut ) :
 
 
 """
-Fonction intermÃ©diaire qui applique une fois l'algorithme de Moore.
-Elle prend en paramÃ¨tres l'automate concernÃ©, la liste de ses
-Ã©tats, son alphabet et une liste de tuples repÃ©sentant les valeurs
-obtenues en appliquant l'algorithme au tour prÃ©cÃ©dent:
+Fonction intermédiaire qui applique une fois l'algorithme de Moore.
+Elle prend en paramètres l'automate concerné, la liste de ses
+états, son alphabet et une liste de tuples représentant les valeurs
+obtenues en appliquant l'algorithme au tour précédent:
 lim = [(groupe de etats[0], groupe par alpha[0], groupe par alpha[1]...),
 		(groupe de etats[1], etc...)]
 """
 def moore( Aut, etats, alpha, lim ) :
-	# On crÃ©e une nouvelle liste que l'on retournera.
+	# On crée une nouvelle liste que l'on retournera.
 	lmoore = list()
 
-	# On renumÃ©rote les Ã©tats.
+	# On renumérote les états pour donner les nouveaux groupes.
 	gpe = -1;
 	for i in range(len(lim)) :
 		if lim[i] not in lim[:i] :
@@ -273,7 +274,7 @@ def moore( Aut, etats, alpha, lim ) :
 		else :
 			lmoore.append(tuple((lim.index(lim[i]),)))
 
-	# On recrÃ©e les nouveaux groupes d'Ã©tats.
+	# On recrée les nouveaux groupes d'états.
 	for i in range(len(lim)) :
 		for j in range(len(alpha)) :
 			d = list(Aut.delta(alpha[j], [ etats[i] ]))
@@ -281,46 +282,53 @@ def moore( Aut, etats, alpha, lim ) :
 
 	return lmoore
 
+"""
+Minimise un automate complet déterministe grâce à l'algorithme de Moore.
 
+"""
 def minimiser( Aut ) :
-	etats = list(Aut.get_states())
-	alpha = list(Aut.get_alphabet())
 
-	# Initialisation. On sÃ©pare les Ã©tats finaux du reste.
+	Aut2 = completer( Aut )
+	Aut2 = determiniser( Aut2 )
+
+	etats = list(Aut2.get_states())
+	alpha = list(Aut2.get_alphabet())
+
+	# Initialisation. On sépare les états finaux du reste.
 	lm1 = list()
 	for i in range(len(etats)) :
-		if Aut.state_is_final(etats[i]) :
+		if Aut2.state_is_final(etats[i]) :
 			lm1.append(tuple((1,)))
 		else :
 			lm1.append(tuple((0,)))
 		for j in range(len(alpha)) :
-			d = list(Aut.delta(alpha[j], [ etats[i] ]))
-			if Aut.state_is_final(d[0]) :
+			d = list(Aut2.delta(alpha[j], [ etats[i] ]))
+			if Aut2.state_is_final(d[0]) :
 				lm1[i] = lm1[i] + tuple((1,))
 			else :
 				lm1[i] = lm1[i] + tuple((0,))
 	
 	# On applique l'algorithme de Moore tant que la liste 
 	# n'est pas stable.
-	lm2 = moore(Aut, etats, alpha, lm1)
+	lm2 = moore(Aut2, etats, alpha, lm1)
 	while lm1 != lm2 :
 		lm1 = lm2
-		lm2 = moore(Aut, etats, alpha, lm1)
+		lm2 = moore(Aut2, etats, alpha, lm1)
 
-	# On rÃ©cupÃ¨re l'Ã©tat initial.
-	init = lm2[etats.index(list(Aut.get_initial_states())[0])][0]
+	# On récupère l'état initial.
+	init = lm2[etats.index(list(Aut2.get_initial_states())[0])][0]
 
-	# On recherche les nouveaux Ã©tats finaux.
+	# On recherche les nouveaux états finaux.
 	lm1 = list()
 	ets = list()
 	for i in range(len(etats)) :
-		if Aut.state_is_final(etats[i]) :
+		if Aut2.state_is_final(etats[i]) :
 			lm1.append(lm2[i][0])
 		ets.append(lm2[i][0])
-	# On enlÃ¨ve les doublons
-	# lm1 la liste des Ã©tats finaux.
-	# lm2 la totalitÃ© des Ã©tats et des transitions.
-	# ets la liste de tous les Ã©tats.
+	# On enlève les doublons
+	# lm1 la liste des états finaux.
+	# lm2 la totalité des états et des transitions.
+	# ets la liste de tous les états.
 	lm1 = list(set(lm1))
 	lm2 = list(set(lm2))
 	ets = list(set(ets))
@@ -331,15 +339,18 @@ def minimiser( Aut ) :
         initials = [init],
         finals = lm1)
 
-	# On rÃ©cupÃ¨re les nouvelles transitions.
+	# On récupère les nouvelles transitions.
 	for i in range(len(lm2)) :
 		for j in range(len(alpha)) :
 			amin.add_transition( (lm2[i][0], alpha[j], lm2[i][j + 1]) )
 
 	return amin
 
-# expression vers automate
 
+
+""" 
+expression vers automate
+"""
 def operation(expr) :
 	if len(expr) != 0 :
 		if expr[0] == '*' :
@@ -353,16 +364,16 @@ def operation(expr) :
 					states = [1,2],
 					initials = [1],
 					finals = [2],
-                                         transitions = [ (1 , expr , 2) ] )
+                    transitions = [ (1 , expr , 2) ] )
 		
 	return None
 
 def generer_epsilon(alpha) :
 	i = 0
 	while( True ) :
-		 if not str(i) in alpha :
-			 return str(i)
-		 i += 1
+		if not str(i) in alpha :
+			return str(i)
+		i += 1
 
 def expression_vers_automate( expr ) :
 	return operation(expr)
@@ -526,71 +537,162 @@ def concatenation(expr1,expr2) :
 			  transitions = transitions )
 
 
+def expression_rationnelle_vers_liste(s) :
+	return yacc.parse(expr_concat(s))
+
+
 """
 Retourne une expression avec la concaténation explicite: '.'
+Par exemple, la chaîne 'a+bc' deviendra 'a+b.c'
 """
 def expr_concat ( expr ) :
 	expr2 = expr[0]
 	for i in range(1,len(expr)):
-		if expr[i] not in [')', '+', '.', '*'] and expr[i - 1] not in ['(', '+', '.'] :
+		# On rajoute entre deux caractères si celui d'avant est:
+		# une parenthèse fermante, une étoile ou une lettre,
+		# et celui d'après est une lettre ou une parenthèse ouvrante.
+		if expr[i] not in [')', '+', '.', '*'] and expr2[len(expr2) - 1] not in ['(', '+', '.'] :
 			expr2 += '.'
 		expr2 += expr[i]
 
 	return expr2
 
+
 """
-def expr_rationnelle_bis ( expr ) :
+Renvoie un booléen vérifiant si l'expression passée en paramètre est
+syntaxiquement correcte ou non. Utile pour l'implémentation Python
+de l'expression vers la liste préfixe.
+"""
+def est_correcte_expr ( expr ) :
+	# 'par' sert à vérifier que l'expression est bien parenthèsée.
+	# Il est incrémenté quand on voit '(', et décrémenté pour ')'.
+	# Il ne doit jamais être inférieur à zéro, et doit être égal
+	# à zéro à la fin du parcours de l'expression.
+	par = 0
+
+	for i in range(len(expr)-1) :
+		# Pour chaque symbole, on regarde ceux qui peuvent suivre
+		# le symbole lu.
+		if expr[i] == '(' :
+			par += 1
+			if  expr[i + 1] in [')', '+', '.', '*'] :
+				return False
+		elif expr[i] == ')' :
+			par -= 1
+			if par < 0 or expr[i + 1] not in [')', '+', '.', '*'] :
+				return False
+		elif expr[i] in ['+', '.'] :
+			if expr[i + 1] in [')', '+', '.', '*'] :
+				return False
+		elif expr[i] == '*' :
+			if expr[i + 1] not in [')', '+', '.'] :
+				return False
+		else :
+			if expr[i + 1] not in [')', '+', '.', '*'] :
+				return False
+
+	# Pour le dernier caractère, on regarde si c'est un caractère qui peut
+	# finir une expression, et si c'est le cas, les caractères qui
+	# peuvent le précéder.
+	if expr[len(expr) - 1] == '*' :
+		if expr[len(expr) - 2] in ['(', '+', '.', '*'] :
+			return False
+	elif expr[len(expr) - 1] == ')' :
+		par -= 1
+		if expr[len(expr) - 2] in ['(', '+', '.'] :
+			return False
+	elif expr[len(expr) - 1] in ['(', '+', '.'] :
+		return False
+	else :
+		if expr[len(expr) - 2] not in ['+', '.'] :
+			return False
+
+	# Expression bien parenthèsée.
+	return par == 0
+
+
+"""
+Renvoie la liste en écriture préfixe de l'expression rationnelle donnée.
+L'expression passée en paramètre peut contenir des concaténations implicites
+'ab+cd', explicites 'a.b+c.d', ou les deux. Elle peut également contenir
+des espaces pour aider à la lecture, ils ne seront pas traités.
+exemple : 'a.b(c + d)* + b.c + a'
+"""
+def expr_rationnelle_vers_liste_bis ( expr ) :
+	# On va utiliser une pile l.
 	l = list()
 
-	for i in range(len(expr)) :
+	# On efface les éventuels espaces inutiles, et on rajoute les 
+	# concaténations explicitement.
+	exp = expr.split(" ")
+	exp = "".join(exp)
+	exp = expr_concat(exp)
+	# On vérifie que l'expression est correcte
+	if not est_correcte_expr( exp ) :
+		print('erreur de syntaxe')
+		return l
 
-		if expr[i] == '*' :
+	for i in range(len(exp)) :
+
+		# On teste tous les cas possibles dans un pseudo-switch.
+		if exp[i] == '*' :
 			tmp = l.pop()
 			l.append(list(('*', tmp)))
 
-		elif expr[i] == '(' :
+		# On traitera l'entité à l'intérieur des parenthèses une fois
+		# la parenthèse fermante correspondante trouvée.
+		elif exp[i] == '(' :
 			l.append('(')
 
-		elif expr[i] == '+' :
-			if len(l) == 2 or l[len(l)-2] =='(' :
+		# Si le plus arrive après une autre opération, c'est que l'on
+		# peut évaluer cette/ces opérations, l'empiler et continuer.
+		elif exp[i] == '+' :
+			if len(l) == 1 or l[len(l)-2] =='(' :
 				l.append('+')
 			else :
-				while l[len(l) - 2] in ['.', '+'] :
+				while l[len(l) - 2] in ['.', '+'] and len(l) > 2:
 					arg2 = l.pop()
 					op = l.pop()
 					arg1 = l.pop()
 					l.append(list((op, arg1, arg2)))
 				l.append('+')
 
-		elif expr[i] == '.' :
-			if len(l) == 2 or l[len(l)-2] in ['(', '+']:
-				l.append('+')
+		# Même principe que pour le '+', en rajoutant une priorité à
+		# la concaténation.
+		elif exp[i] == '.' :
+			if len(l) == 1 or l[len(l)-2] in ['(', '+']:
+				l.append('.')
 			elif l[len(l) - 2] == '.' :
 				arg2 = l.pop()
 				op = l.pop()
 				arg1 = l.pop()
 				l.append(list((op, arg1, arg2)))
-				l.append('+')
+				l.append('.')
 
-			l.append('.')
-
-		elif expr[i] == ')' :
-			if l[len(l)-2] == '(' :
-				tmp = l.pop() #parenthese ouvrante
-				l.pop()
-				l.append(tmp)
+		# On évalue l'intérieur des parenthèses.
+		elif exp[i] == ')' :
+			while l[len(l)-2] != '(' :
+				arg2 = l.pop()
+				op = l.pop()
+				arg1 = l.pop()
+				l.append(list((op, arg1, arg2)))
+			l.pop(len(l)-2) #parenthese ouvrante
 			
 
 		# tout le reste: une lettre de l'alphabet.
 		else :
-			if l[len(l)-1] == "." :
-				l.pop()
-				tmp = l.pop()
-				l.append([".",tmp,expr[i]])
-			elif l[len(l)-1]
+			l.append(exp[i])
+
+	# On s'assure que toutes les expressions ont bien été transformées,
+	# ce qui n'est pas le cas si l'expression se termine
+	# par une lettre, par exemple.
+	while l[len(l) - 2] in ['+', '.'] :
+		arg2 = l.pop()
+		op = l.pop()
+		arg1 = l.pop()
+		l.append(list((op, arg1, arg2)))
+
+	if len(l) == 1 :
+		return l[0]
 
 	return l
-"""
-
-def expression_rationnelle_vers_liste(s) :
-	return yacc.parse(expr_concat(s))
