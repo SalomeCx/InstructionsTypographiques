@@ -517,3 +517,69 @@ def concatenation(expr1,expr2) :
 			  initials = [s1] ,
 			  transitions = transitions )
 
+
+"""
+Retourne une expression avec la concaténation explicite: '.'
+"""
+def expr_concat ( expr ) :
+	expr2 = expr[0]
+	for i in range(1,len(expr)):
+		if expr[i] not in [')', '+', '.', '*'] and expr[i - 1] not in ['(', '+', '.'] :
+			expr2 += '.'
+		expr2 += expr[i]
+
+	return expr2
+
+
+def expr_rationnelle_bis ( expr ) :
+	l = list()
+
+	for i in range(len(expr)) :
+
+		if expr[i] == '*' :
+			tmp = l.pop()
+			l.append(list(('*', tmp)))
+
+		elif expr[i] == '(' :
+			l.append('(')
+
+		elif expr[i] == '+' :
+			if len(l) == 2 or l[len(l)-2] =='(' :
+				l.append('+')
+			else :
+				while l[len(l) - 2] in ['.', '+'] :
+					arg2 = l.pop()
+					op = l.pop()
+					arg1 = l.pop()
+					l.append(list((op, arg1, arg2)))
+				l.append('+')
+
+		elif expr[i] == '.' :
+			if len(l) == 2 or l[len(l)-2] in ['(', '+']:
+				l.append('+')
+			elif l[len(l) - 2] == '.' :
+				arg2 = l.pop()
+				op = l.pop()
+				arg1 = l.pop()
+				l.append(list((op, arg1, arg2)))
+				l.append('+')
+
+			l.append('.')
+
+		elif expr[i] == ')' :
+			if l[len(l)-2] == '(' :
+				tmp = l.pop() #parenthese ouvrante
+				l.pop()
+				l.append(tmp)
+			
+
+		# tout le reste: une lettre de l'alphabet.
+		else :
+			if l[len(l)-1] == "." :
+				l.pop()
+				tmp = l.pop()
+				l.append([".",tmp,expr[i]])
+			elif l[len(l)-1]
+
+	return l
+
