@@ -438,20 +438,20 @@ def etoile(expr) :
     for i in aut.get_final_states() :
         transitions += [ ( i , epsilon , s3 ) ]
 
-    return automaton(alphabet = alpha,
-             epsilons = [epsilon] + list(aut.get_epsilons() ,
-             states = list(aut.get_states()) + [s1 , s2 , s3, s4] ,
-             initials = [s1] ,
-             finals = [s4],
-                         transitions = transitions)
-
+    return automaton(
+        alphabet = alpha,
+        epsilons = [epsilon] + list(aut.get_epsilons()) ,
+        states = list(aut.get_states()) + [s1 , s2 , s3, s4] ,
+        initials = [s1] ,
+        finals = [s4],
+        transitions = transitions)
 
 """
-retourne l'automate union des automates définis par expr1 et expr2.
+Retourne l'automate union des automates correspondant à expr1 et expr2.
 """
 def unionEVA(expr1,expr2) :
 
-    #on renomme les états au cas où il y aurait des redondances
+    #on récupère les automates correspondant à expr1 et expr2
     aut1 = operation(expr1)
     aut2 = operation(expr2)
 
