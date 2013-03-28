@@ -34,7 +34,9 @@ def delete_state( Aut, state ) :
         else :
             i+=1
 
-    return automaton(alphabet = alpha,
+    return automaton(
+        epsilons = Aut.get_epsilons(),
+        alphabet = alpha,
         states = s,
         initials = init,
         finals = fin,
@@ -60,7 +62,7 @@ def completer( Aut ):
 
     for i in range(len(alpha)) :
         for j in range(len(s)) :
-            if len(a.delta(alpha[i], [s[j]])) == 0 :
+            if len(a.delta(alpha[i], [s[j]],True)) == 0 :
                 complet = True
                 a.add_transition( (s[j], alpha[i], puits) )
 
@@ -74,17 +76,21 @@ def completer( Aut ):
 
     return a
 
+
+"""
+Genere un ensemble de transitions ((x,y),a,(x',y')) tel que (x,a,x') appartient à l'automate a1 et (y,a,y') appartient à l'automate a2
+"""
 def nouvelles_transitions_IU(a1,a2,etats1,etats2,alpha) :
     trans = []
 
     for i in range( len(etats1) ) :
-        for j in range( len(etats2) ) :
-            for k in range( len(alpha) ) :
+        for j in range( len(etats2) ) : # pour chaque couple de sommet (x,y)
+            for k in range( len(alpha) ) : # pour chaque lettre
                 l1 = list( a1.delta(alpha[k],[ etats1[i] ]) )
                 l2 = list( a2.delta(alpha[k],[ etats2[j] ]) )
                 for ii in range( len(l1) ) :
-                    for jj in range( len(l2) ) :
-                        trans = trans + [( (etats1[i],etats2[j]), alpha[k] , (l1[ii],l2[jj]) )]
+                    for jj in range( len(l2) ) : # pour chaque couple (x',y') accessible avec la lettre et le couple précédent
+                        trans = trans + [( (etats1[i],etats2[j]), alpha[k] , (l1[ii],l2[jj]) )] # on crée la transition correspondante
     return trans
 
 
@@ -104,16 +110,16 @@ def produit_cartesien( l1, l2 ) :
 Retourne un automate construit 
 sur l'union des deux automates passés en paramètres.
 On considère l'union uniquement sur deux automates comprenant
-le même alphabet.
+le même alphabet, sinon renvoie un automate vide.
 """
 def union( Aut1, Aut2 ) :
     Aut1 = completer(Aut1)
     Aut2 = completer(Aut2)
     
-    alpha = list(Aut1.get_alphabet())
+    alpha = list(Aut1.get_alphabet() - Aut1.get_epsilons())
 
-    if alpha != list( Aut2.get_alphabet() ) :
-        return None
+    if alpha != list( Aut2.get_alphabet() - Aut2.get_epsilons() ) :
+        return automaton()
 
     # Tous les états.
     et1 = list(Aut1.get_states())
@@ -149,26 +155,29 @@ def union( Aut1, Aut2 ) :
 Retourne un automate construit 
 sur l'intersection des deux automates passés en paramètres.
 On considère l'intersection uniquement sur deux automates comprenant
-le même alphabet.
+le même alphabet, sinon renvoie un automate vide.
 """
 def intersection(aut1,aut2) :
 
     aut1 = completer(aut1)
     aut2 = completer(aut2)
     
-    alpha = list(aut1.get_alphabet())
+    alpha = list(aut1.get_alphabet() - aut1.get_epsilons() )
 
-    if alpha != list( aut2.get_alphabet() ) :
-        return None
+    if alpha != list( aut2.get_alphabet() - aut2.get_epsilons() ) :
+        return automaton()
 
+    #Tous les états
     etats1 = list( aut1.get_states() )
     etats2 = list( aut2.get_states() )
     etats = produit_cartesien(etats1,etats2)
 
+    # les etats initiaux
     ini1 = list( aut1.get_initial_states() )
     ini2 = list( aut2.get_initial_states() )
     ini = produit_cartesien(ini1,ini2)
 
+    #lLes etats finaux
     fin1 = list( aut1.get_final_states() )
     fin2 = list( aut2.get_final_states() )
     fin = produit_cartesien(fin1,fin2)
@@ -182,46 +191,50 @@ def intersection(aut1,aut2) :
              transitions = trans )
     a.renumber_the_states()
     return a
- 
+
+"""
+Retourne l'automate miroir de l'automate Aut
+"""
 def miroir( Aut ) :
 
     trans = list( Aut.get_transitions() )
     newTrans = []
     for i in range( len(trans) ) :
-        newTrans = newTrans + [(trans[i][2], trans[i][1], trans[i][0] )]
+        newTrans = newTrans + [(trans[i][2], trans[i][1], trans[i][0] )] #chaque transitions de la forme (x,a,y) et remplacé par la trnsition (y,a,x)
     
     a = automaton(
+        epsilons = Aut.get_epsilons(),
         alphabet = Aut.get_alphabet(), 
         states = Aut.get_states(), 
-        initials = Aut.get_final_states(),
-        finals = Aut.get_initial_states(),
+        initials = Aut.get_final_states(), # les etats finaux deviennent initiaux
+        finals = Aut.get_initial_states(), #les etats initiaux deviennent finaux
         transitions = newTrans )
     return a
 
 def determiniser( aut ) :
 
-    ini = aut.get_initial_states()
-    states = [ini]
+    ini = aut.get_initial_states() # nouvelle etat defini par l'ensemble des etats initiaux
+    states = [ini] #liste des nouveaux états
     trans = []
         
     alpha = aut.get_alphabet() - aut.get_epsilons()
 
-    l = [ini]
-    while( len(l) != 0 ) :
-        for i in alpha :
-            tmp = aut.delta(i,l[0])
-            if len(tmp) != 0 :
-                trans += [ ( l[0] , i , tmp ) ]
-                if not tmp in states :
+    l = [ini]  # on enfile cette etat, dans la file des etats a traiter
+    while( len(l) != 0 ) : # tant qu'on a des etats a traiter
+        for i in alpha : # pour chaque lettre 
+            tmp = aut.delta(i,l[0]) #on defini l'etat qu'il peut rejoindre
+            if len(tmp) != 0 : #s'il y en a
+                trans += [ ( l[0] , i , tmp ) ] #on crée la transitions
+                if not tmp in states : #et s'il n'a jamais été vu, on le rajoute
                     states += [tmp]
                     l += [tmp]
-        l.pop(0)
+        l.pop(0) #on defile l'etat traiter
 
     oldFinals = aut.get_final_states()
     fin = []
     for i in states :
         for j in i :
-            if j in oldFinals :
+            if j in oldFinals : #pour chaque nouveaux sommet, si un des sommets qui le définie est final, il devient final
                 fin += [i]
                 break
 
@@ -241,6 +254,9 @@ def complement( aut ) :
     oldFinals = a.get_final_states()
     fin = []
 
+    """
+    Pour chaque sommet, s'il n'etait pas final, il le devient.
+    """
     for i in a.get_states() :
         if not i in oldFinals :
             fin += [i]
@@ -351,6 +367,10 @@ def minimiser( Aut ) :
 """ 
 expression vers automate
 """
+
+"""
+Fonction intermédiaire servant de pseudo-switch entre les differentes operation possibles.
+"""
 def operation(expr) :
     if len(expr) != 0 :
         if expr[0] == '*' :
@@ -368,6 +388,9 @@ def operation(expr) :
         
     return None
 
+"""
+Chercher un charactere n'appartenant pas à l'alphabet et le retourne.
+"""
 def generer_epsilon(alpha) :
     i = 0
     while( True ) :
@@ -375,13 +398,22 @@ def generer_epsilon(alpha) :
             return str(i)
         i += 1
 
+
+"""
+Retourne l'automate correspondant à l'expression expr.
+"""
 def expression_vers_automate( expr ) :
     return operation(expr)
 
-
+"""
+Applique "Etoile" à l'automate defini par l'expression expr.
+"""
 def etoile(expr) :
-    aut = operation(expr)
+    aut = operation(expr) # on recupere l'automate defini par expr.
     
+    """
+    On crée les etats nécessaires.
+    """
     s1 = aut.get_maximal_id() + 1
     s2 = s1 + 1
     s3 = s2 + 1
@@ -389,11 +421,13 @@ def etoile(expr) :
 
     alpha = aut.get_alphabet()
     
+    #On récupère un charactère definissant epsilons.
     if(aut.has_epsilon_characters()) :
         epsilon = list(aut.get_epsilons())[0]
     else :
         epsilon = generer_epsilon(alpha)
 
+    #on genere les nouvelles transitions nécessaire.
     transitions = list( aut.get_transitions() ) 
     transitions += [ (s1 , epsilon , s2) ,
              (s1 , epsilon , s4) ,
@@ -405,12 +439,16 @@ def etoile(expr) :
         transitions += [ ( i , epsilon , s3 ) ]
 
     return automaton(alphabet = alpha,
-             epsilons = [epsilon] ,
+             epsilons = [epsilon] + list(aut.get_epsilons() ,
              states = list(aut.get_states()) + [s1 , s2 , s3, s4] ,
              initials = [s1] ,
              finals = [s4],
                          transitions = transitions)
 
+
+"""
+retourne l'automate union des automates définis par expr1 et expr2.
+"""
 def unionEVA(expr1,expr2) :
 
     #on renomme les états au cas où il y aurait des redondances
@@ -474,6 +512,10 @@ def unionEVA(expr1,expr2) :
               initials = [s1] ,
               transitions = transitions )
 
+
+"""
+Retourne l'automate correspondant à la concaténation des automates définis par expr1 et expr2.
+"""
 def concatenation(expr1,expr2) :
 
     #on renomme les états au cas où il y aurait des redondances
