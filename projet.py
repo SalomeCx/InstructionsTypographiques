@@ -54,7 +54,11 @@ def completer( Aut ):
     alpha = list(a.get_alphabet() - a.get_epsilons())
 
     # On parcourt tous les états pour donner un nom correct à l'état puits.
-    puits = a.get_maximal_id() + 1
+    puits = a.get_maximal_id()
+    if puits == None :
+        puits = 0
+    else :
+        puits += 1
     a.add_state(puits)
     
     # On modifie ce booléen si on fait au moins une modification.
@@ -414,7 +418,11 @@ def etoile(expr) :
     """
     On crée les etats nécessaires.
     """
-    s1 = aut.get_maximal_id() + 1
+    s1 = aut.get_maximal_id()
+    if s1 == None :
+        s1 = 0
+    else :
+        s1 += 1
     s2 = s1 + 1
     s3 = s2 + 1
     s4 = s3 + 1
@@ -457,8 +465,12 @@ def unionEVA(expr1,expr2) :
 
     aut1.renumber_the_states()
     aut2.renumber_the_states()
-    x = aut1.get_maximal_id() + 1
-
+    x = aut1.get_maximal_id()
+    if x == None :
+        x = 0
+    else :
+        x += 1
+        
     def rajouter(y) :
         return y + x
 
@@ -494,7 +506,11 @@ def unionEVA(expr1,expr2) :
             transitions += [i]
             
     #creation de l'automate union
-    s1 = aut2.get_maximal_id() + 1
+    s1 = aut2.get_maximal_id()
+    if s1 == None :
+        s1 = 0
+    else :
+        s1 += 1
     s2 = s1 + 1
 
     for i in aut1.get_initial_states() :
@@ -524,7 +540,11 @@ def concatenation(expr1,expr2) :
 
     aut1.renumber_the_states()
     aut2.renumber_the_states()
-    x = aut1.get_maximal_id() + 1
+    x = aut1.get_maximal_id()
+    if x == None :
+        x = 0
+    else :
+        x+=1
 
     def rajouter(y) :
         return y + x
@@ -561,7 +581,11 @@ def concatenation(expr1,expr2) :
             transitions += [i]
             
     #creation de l'automate concaténation
-    s1 = aut2.get_maximal_id() + 1
+    s1 = aut2.get_maximal_id()
+    if s1 == None :
+        s1 = 0
+    else :
+        s1 += 1
     s2 = s1 + 1
 
     for i in aut1.get_initial_states() :
